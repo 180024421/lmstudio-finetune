@@ -1,0 +1,18 @@
+[project]
+name = "lmstudio-finetune"
+version = "1.0.0"
+description = "本地 QLoRA 微调 + LM Studio 部署工具链"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = [".venv", "output", ".git"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

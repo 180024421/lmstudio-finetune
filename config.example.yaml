@@ -1,6 +1,7 @@
 # 复制为 config.yaml 后修改
 
-base_model: Qwen/Qwen2.5-1.5B-Instruct   # 8G 显存建议 1.5B~3B
+base_model: Qwen/Qwen2.5-1.5B-Instruct   # 8G 显存建议 1.5B~3B；16G+ 可试 3B/7B
+
 output_dir: output/run1
 
 dataset:
@@ -8,8 +9,12 @@ dataset:
   eval_file: data/examples/eval.jsonl
   max_samples: 0              # 0 = 全部
   max_seq_length: 2048
+  chat_template: qwen         # qwen | llama3 | chatml | mistral | alpaca
 
 lora:
+  name: run1                    # 注册到 LoRA 管理器
+  description: "默认微调运行"
+  tags: [demo]
   r: 16
   lora_alpha: 32
   lora_dropout: 0.05
@@ -24,21 +29,174 @@ train:
   logging_steps: 10
   save_steps: 100
   eval_steps: 100
-  bf16: true                  # 不支持则改 fp16: true
+  save_total_limit: 3
+  bf16: true
   fp16: false
   seed: 42
+  # 断点续训: true | checkpoint-200 | output/run1/checkpoint-200
+  resume_from_checkpoint: false
+  load_best_model_at_end: true
+  metric_for_best_model: eval_loss
+  early_stopping: true
+  early_stopping_patience: 3
+  continue_from_adapter: ""     # LoRA 名或路径，增量续训
+  auto_eval_after_train: false
+  auto_eval_samples: 5
+  regression_check: false
+  regression_min_delta: -0.05
+  deepspeed: ""                 # 填 deepspeed/ds_config.json 启用多卡 ZeRO
+
+unsloth:
+  gradient_checkpointing: true
+
+kto:
+  train_file: data/examples/kto.jsonl
+  output_dir: output/kto_run1
+  beta: 0.1
+  num_epochs: 1
+  batch_size: 1
+  learning_rate: 5.0e-5
+
+benchmark:
+  name: default
+  file: benchmarks/default.jsonl
+
+inbox:
+  dir: data/inbox
+  processed_dir: data/inbox/processed
+  failed_dir: data/inbox/failed
+  merge_into: data/train.jsonl
+  poll_seconds: 60
+  auto_train: false
+  auto_pipeline: false              # 合并后自动 run_pipeline.py
+  auto_alignment: false             # 合并后自动 SFT→DPO
+
+api:
+  mode: proxy                  # proxy → LM Studio | local → 加载 HF+LoRA
+  adapter_dir: output/run1/adapter
+  port: 8000
+
+ollama:
+  model_name: my-finetuned
 
 quantization:
-  load_in_4bit: true        # QLoRA，省显存
+  load_in_4bit: true
   bnb_4bit_compute_dtype: bfloat16
+
+monitoring:
+  tensorboard: true
+  wandb: false                  # 需 wandb login
+  notify_on_complete: true      # Windows 桌面通知
 
 export:
   merged_dir: output/merged
+  merged_multi_dir: output/merged_multi
   gguf_out: output/model.gguf
-  # llama.cpp 路径（用于转 GGUF 供 LM Studio 加载）
-  llama_cpp_dir: ""
+  gguf_quant: f16               # f16 | q8_0 | q4_k_m | q4_0
+  gguf_quants: [f16, q4_k_m]    # --export --all 时批量量化
+  llama_cpp_dir: ""             # llama.cpp 根目录
+  ollama_system: "你是一个有帮助的 AI 助手。"
 
 lm_studio:
   base_url: http://127.0.0.1:1234/v1
   api_key: lm-studio
-  model: ""                   # 留空用当前加载模型
+  model: ""                     # 留空用当前加载模型
+
+promo:
+  pipeline_root: ../video-promo-pipeline
+  jobs_dir: ../video-promo-pipeline/output
+  data_dir: data/promo
+  eval_job_ratio: 0.2           # 按 job 留作评测集
+  eval_samples: 20
+  use_judge: true
+  ab_tag: promo                 # A/B 对比带此标签的 LoRA
+  ab_samples: 15
+  ab_loras: []                  # 留空则自动按 ab_tag 筛选
+  lm_studio_model: ""           # 导出 GGUF 后在 LM Studio 中的模型 ID
+  auto_apply_config: false      # 是否回写 video-promo config.yaml
+
+augment:
+  variants_per_row: 2
+  max_rows: 0                   # 0 = 全部；增强耗 API，可先抽样
+
+data_generation:
+  pairs_per_chunk: 3
+  chunk_size: 2000
+  min_quality_score: 0.6
+  min_judge_score: 0.6
+  queue_for_review: false
+  save_rejected: true
+
+huggingface:
+  mirror: true
+  endpoint: https://hf-mirror.com
+  cache_dir: ""
+
+eval:
+  judge_model: ""               # 留空用 lm_studio.model
+
+orpo:
+  train_file: data/examples/dpo.jsonl
+  output_dir: output/orpo_run1
+  beta: 0.1
+  num_epochs: 1
+  batch_size: 1
+  learning_rate: 5.0e-5
+
+distillation:
+  teacher_model: ""             # 留空用 lm_studio.model
+  pairs_per_topic: 3
+  judge_filter: true
+  min_judge_score: 0.6
+
+pipeline:
+  use_judge: true
+  eval_samples: 10
+  regression: true
+
+sweep:
+  enabled: false
+
+vllm:
+  model_path: output/merged
+  port: 8001
+  dtype: auto
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+
+alignment:
+  skip_sft: false
+  skip_dpo: false
+  use_sft_adapter_for_dpo: true     # DPO 从 SFT adapter 继续
+
+multi_gpu:
+  nproc: 0                          # 0 = 自动检测 GPU 数
+
+hub:
+  repo_id: ""                       # 如 username/my-lora
+  token: ""                         # 留空用 HF_TOKEN 环境变量
+  private: true
+  upload_merged: true
+
+crawler:
+  max_pages: 10
+  same_domain_only: true
+  delay_seconds: 1.0
+
+api_usage:
+  enabled: true
+  log_path: output/api_usage.json
+  cost_per_1k_prompt: 0             # LM Studio 本地一般为 0
+  cost_per_1k_completion: 0
+
+dpo:
+  train_file: data/examples/dpo.jsonl
+  output_dir: output/dpo_run1
+  continue_from_adapter: ""         # 或 SFT adapter 路径
+  beta: 0.1
+  max_length: 1024
+  max_prompt_length: 512
+  reference_free: true          # 省显存，不加载 ref 模型
+  num_epochs: 1
+  batch_size: 1
+  learning_rate: 5.0e-5

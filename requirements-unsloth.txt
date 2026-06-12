@@ -1,0 +1,2 @@
+# 可选：Unsloth 加速训练（需匹配 CUDA 版本，见 https://github.com/unslothai/unsloth）
+unsloth

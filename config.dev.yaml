@@ -1,0 +1,24 @@
+# 开发环境覆盖（用法: --profile dev 或 set LMSTUDIO_PROFILE=dev）
+
+output_dir: output/dev_run
+
+dataset:
+  max_samples: 50              # 快速试跑
+
+train:
+  num_epochs: 1
+  save_steps: 20
+  eval_steps: 20
+  logging_steps: 5
+
+monitoring:
+  wandb: false
+  notify_on_complete: false
+
+pipeline:
+  eval_samples: 3
+  regression: false
+
+inbox:
+  auto_train: false
+  auto_pipeline: false

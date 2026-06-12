@@ -1,0 +1,2 @@
+# 可选：vLLM 高性能推理（需 Linux + NVIDIA，Windows 支持有限）
+vllm>=0.6.0

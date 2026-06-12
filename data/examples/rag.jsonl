@@ -1,0 +1,2 @@
+{"context": "Redis 使用内存存储键值数据。缓存穿透是指查询不存在的数据导致请求全部打到数据库。", "question": "什么是缓存穿透？", "answer": "缓存穿透是查询不存在的数据，使请求绕过缓存直接访问数据库的现象。"}
+{"context": "Spring Boot 通过自动配置简化 Java 应用开发，内嵌 Tomcat，支持 starter 依赖。", "question": "Spring Boot 有什么特点？", "answer": "自动配置、内嵌服务器、starter 依赖，能快速构建独立运行的生产级应用。"}

@@ -8,6 +8,8 @@ logs/
 *.gguf
 .cache/
 wandb/
+!data/examples/
+web/__pycache__/
 .DS_Store
 *.pt
 *.safetensors

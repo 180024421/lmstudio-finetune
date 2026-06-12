@@ -1,0 +1,4 @@
+{"prompt": "写一条关于 Redis 的短视频标题", "completion": "Redis 缓存穿透怎么防？布隆过滤器实战", "label": true}
+{"prompt": "写一条关于 Redis 的短视频标题", "completion": "redis", "label": false}
+{"prompt": "接口超时怎么办？", "completion": "先看超时配置和慢查询，再用链路追踪定位。", "label": true}
+{"prompt": "接口超时怎么办？", "completion": "重启", "label": false}

@@ -1,0 +1,2 @@
+# 可选：语义去重 embedding
+sentence-transformers>=3.0.0

@@ -1,0 +1,24 @@
+# 生产环境覆盖（用法: --profile prod）
+
+output_dir: output/prod_run
+
+train:
+  num_epochs: 5
+  load_best_model_at_end: true
+  early_stopping: true
+  regression_check: true
+
+monitoring:
+  notify_on_complete: true
+
+pipeline:
+  eval_samples: 20
+  regression: true
+  use_judge: true
+
+inbox:
+  auto_pipeline: true
+  poll_seconds: 120
+
+hub:
+  private: true

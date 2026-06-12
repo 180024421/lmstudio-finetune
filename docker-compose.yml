@@ -1,0 +1,42 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      - PORT=7860
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./config.yaml:/app/config.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["python", "serve_api.py"]
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - API_MODE=proxy
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # 训练需 NVIDIA GPU，取消注释并安装 nvidia-container-toolkit
+  # train:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/Dockerfile.gpu
+  #   runtime: nvidia
+  #   volumes:
+  #     - ./data:/app/data
+  #     - ./output:/app/output
+  #     - ./config.yaml:/app/config.yaml
+  #   command: ["python", "train.py"]
