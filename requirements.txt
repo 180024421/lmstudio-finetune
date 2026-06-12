@@ -1,0 +1,13 @@
+torch>=2.1.0
+transformers>=4.44.0
+datasets>=2.19.0
+peft>=0.12.0
+trl>=0.9.6
+accelerate>=0.33.0
+bitsandbytes>=0.43.0; platform_system != "Darwin"
+pyyaml>=6.0
+rich>=13.7.0
+huggingface-hub>=0.24.0
+sentencepiece>=0.2.0
+protobuf>=4.25.0
+openai>=1.40.0

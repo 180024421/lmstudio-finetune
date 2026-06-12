@@ -1,0 +1,1 @@
+{"messages": [{"role": "user", "content": "什么是 Docker？"}, {"role": "assistant", "content": "Docker 是一种容器化平台，把应用与依赖打包成镜像，实现一次构建、到处运行。"}]}

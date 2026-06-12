@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+config.yaml
+output/
+logs/
+*.gguf
+.cache/
+wandb/
+.DS_Store
+*.pt
+*.safetensors

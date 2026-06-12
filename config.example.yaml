@@ -1,0 +1,44 @@
+# 复制为 config.yaml 后修改
+
+base_model: Qwen/Qwen2.5-1.5B-Instruct   # 8G 显存建议 1.5B~3B
+output_dir: output/run1
+
+dataset:
+  train_file: data/examples/train.jsonl
+  eval_file: data/examples/eval.jsonl
+  max_samples: 0              # 0 = 全部
+  max_seq_length: 2048
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+train:
+  num_epochs: 3
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  logging_steps: 10
+  save_steps: 100
+  eval_steps: 100
+  bf16: true                  # 不支持则改 fp16: true
+  fp16: false
+  seed: 42
+
+quantization:
+  load_in_4bit: true        # QLoRA，省显存
+  bnb_4bit_compute_dtype: bfloat16
+
+export:
+  merged_dir: output/merged
+  gguf_out: output/model.gguf
+  # llama.cpp 路径（用于转 GGUF 供 LM Studio 加载）
+  llama_cpp_dir: ""
+
+lm_studio:
+  base_url: http://127.0.0.1:1234/v1
+  api_key: lm-studio
+  model: ""                   # 留空用当前加载模型
