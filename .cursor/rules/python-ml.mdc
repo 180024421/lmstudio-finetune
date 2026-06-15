@@ -1,0 +1,36 @@
+---
+description: Python ML 训练与数据工具编码规范
+globs: src/**/*.py,tests/**/*.py,*.py
+alwaysApply: false
+---
+
+# Python / ML 规范
+
+## 代码风格
+
+- Python 3.10+，`from __future__ import annotations`
+- 行宽 120，遵循 `pyproject.toml` 中 ruff 配置
+- 类型注解用于公共函数；`dict[str, Any]` 表示配置对象
+- 用 `rich.console.Console` 输出用户可见日志，不用裸 `print`（CLI 入口除外）
+
+## 配置与数据
+
+- 加载配置：`from src.config_loader import load_config`
+- 校验配置：`from src.config_schema import validate_config`
+- JSONL 数据集：`from src.dataset import load_jsonl`
+- chat 模板：`src/chat_templates.py`（qwen / llama3 / chatml / mistral / alpaca）
+
+## 训练相关
+
+- SFT/QLoRA：`src/train_lora.py` → `run_train()`
+- DPO/KTO/ORPO：`src/train_dpo.py` / `train_kto.py` / `train_orpo.py`
+- 一键流水线：`src/pipeline.py` → `run_full_pipeline()`
+- 导出合并：`src/export_model.py` → `merge_lora()` / `export_all()`
+- 训练前可用 `src/vram_estimate.py` 估算显存需求
+
+## 禁止事项
+
+- 不要在 `src/` 里写 PowerShell 或平台特定路径逻辑
+- 不要跳过 `validate_config` 直接训练
+- 不要在测试中下载大模型或占用 GPU
+- 不要新增与现有 CLI 重复的入口脚本，优先扩展 `cli.py` 子命令

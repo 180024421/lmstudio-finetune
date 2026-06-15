@@ -27,6 +27,7 @@ def main() -> None:
         print(f"WARN  L{issue.line}: {issue.message}", file=sys.stderr)
     if report.ok and args.register_version:
         from src.data_version import register_dataset_version
+
         ver = register_dataset_version(path)
         print(f"已登记版本 fingerprint={ver['fingerprint']} count={ver['count']}")
     sys.exit(0 if report.ok else 1)

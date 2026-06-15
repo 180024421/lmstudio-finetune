@@ -7,7 +7,13 @@ from typing import Any
 import torch
 from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
 from rich.console import Console
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, EarlyStoppingCallback, TrainingArguments
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    EarlyStoppingCallback,
+    TrainingArguments,
+)
 from trl import SFTTrainer
 
 from .config_loader import ROOT, load_config
@@ -188,7 +194,7 @@ def run_train(cfg: dict[str, Any] | None = None, *, resume: bool = False) -> Pat
     tokenizer.save_pretrained(adapter_dir)
     console.print(f"[green]LoRA 已保存[/green] {adapter_dir}")
 
-    lora_name = (lcfg.get("name") or out_dir.name)
+    lora_name = lcfg.get("name") or out_dir.name
     register_adapter(
         lora_name,
         adapter_dir,
@@ -201,6 +207,7 @@ def run_train(cfg: dict[str, Any] | None = None, *, resume: bool = False) -> Pat
     if bool(tcfg.get("auto_eval_after_train", False)):
         try:
             from .eval_runner import run_eval_lmstudio
+
             eval_file = dcfg.get("eval_file")
             if eval_file and (ROOT / eval_file).exists():
                 er = run_eval_lmstudio(ROOT / eval_file, cfg, max_samples=int(tcfg.get("auto_eval_samples", 5)))
@@ -228,6 +235,6 @@ def run_train(cfg: dict[str, Any] | None = None, *, resume: bool = False) -> Pat
         if not gate["ok"]:
             console.print(f"[red]回归门禁未通过[/red] {gate['reason']}")
         else:
-            console.print(f"[green]回归检查通过[/green]")
+            console.print("[green]回归检查通过[/green]")
 
     return adapter_dir

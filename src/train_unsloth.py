@@ -15,9 +15,9 @@ console = Console()
 def run_unsloth(cfg: dict[str, Any] | None = None) -> Path:
     cfg = cfg or load_config()
     try:
-        from unsloth import FastLanguageModel  # type: ignore
-        from trl import SFTTrainer
         from transformers import TrainingArguments
+        from trl import SFTTrainer
+        from unsloth import FastLanguageModel  # type: ignore
     except ImportError as e:
         raise ImportError("请安装 Unsloth: pip install unsloth") from e
 

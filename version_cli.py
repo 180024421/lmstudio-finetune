@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from src.data_version import list_versions, register_dataset_version, versions_markdown
+from src.data_version import register_dataset_version, versions_markdown
 
 
 def main() -> None:

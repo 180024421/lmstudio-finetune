@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """统一 CLI：python cli.py <子命令> [参数...]"""
+
 from __future__ import annotations
 
 import sys
@@ -8,7 +9,9 @@ import sys
 def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
-        print("子命令: train|eval|export|validate|web|api|pipeline|promo|alignment|sweep|distill|judge-filter|orpo|kto|dpo|benchmark|doctor|merge|augment|diff|shuffle|version|train-report|train-multi|crawl|upload-hub|usage|lora-ab")
+        print(
+            "子命令: train|eval|export|validate|web|api|pipeline|promo|alignment|sweep|distill|judge-filter|orpo|kto|dpo|benchmark|doctor|merge|augment|diff|shuffle|version|train-report|train-multi|crawl|upload-hub|usage|lora-ab"
+        )
         raise SystemExit(1)
     cmd = sys.argv[1]
     rest = sys.argv[2:]
@@ -47,6 +50,7 @@ def main() -> None:
         print(f"未知子命令: {cmd}")
         raise SystemExit(1)
     import runpy
+
     sys.argv = [script] + rest
     runpy.run_path(script, run_name="__main__")
 

@@ -47,6 +47,7 @@ def _load_local_model(cfg: dict[str, Any]):
     )
     if adapter:
         from pathlib import Path
+
         from .config_loader import ROOT
 
         p = Path(adapter)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 REQUIRED_TOP = ("base_model",)
 CHAT_TEMPLATES = ("qwen", "llama3", "chatml", "mistral", "alpaca")
 

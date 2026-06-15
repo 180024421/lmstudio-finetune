@@ -13,6 +13,7 @@ def main() -> None:
     p.add_argument("--config", default=None)
     args = p.parse_args()
     from pathlib import Path
+
     cfg = load_config(Path(args.config)) if args.config else load_config()
     deploy_to_ollama(cfg, model_name=args.name)
 

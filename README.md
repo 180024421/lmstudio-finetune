@@ -42,6 +42,22 @@
 
 ## 快速开始
 
+### 一键启动（推荐）
+
+双击 `一键启动.cmd`，或在项目目录执行：
+
+```powershell
+cd lmstudio-finetune
+.\start.cmd              # 启动 Gradio 控制台 → http://127.0.0.1:7860
+.\start.cmd -Mode api    # 仅 FastAPI → http://127.0.0.1:8000
+.\start.cmd -Mode both   # Web + API 同时启动
+.\start.cmd -Setup       # 强制重装 Web 依赖
+```
+
+首次运行会自动创建虚拟环境、复制 `config.yaml`，并尝试打开 LM Studio。
+
+### 完整流程
+
 ```powershell
 cd lmstudio-finetune
 
@@ -53,7 +69,7 @@ copy config.example.yaml config.yaml   # 若 setup 未自动复制
 .\run.ps1 -Train
 .\run.ps1 -ExportAll
 
-# Gradio 控制台
+# Gradio 控制台（等同 .\start.cmd）
 .\run.ps1 -Web
 # → http://127.0.0.1:7860
 
@@ -155,6 +171,45 @@ $env:LMSTUDIO_PROFILE = "prod"
 ```
 
 `config.dev.yaml` / `config.prod.yaml` 会深度合并到 `config.yaml` 之上。
+
+## 开发工具
+
+### 环境变量
+
+```powershell
+copy .env.example .env
+# 填写 HF_TOKEN、WANDB_API_KEY 等（.env 不入库）
+```
+
+### 代码质量
+
+```powershell
+pip install ruff pre-commit
+pre-commit install          # 提交前自动 ruff
+ruff check .
+ruff format --check .
+pytest tests/ -q
+```
+
+### 环境诊断与显存估算
+
+```powershell
+python doctor.py --markdown
+# 输出含 GPU、LM Studio、依赖包检查及 QLoRA 显存预估
+```
+
+### AI Agent 配置
+
+- [AGENTS.md](AGENTS.md) — Cursor/Codex 项目指南
+- `.cursor/rules/` — 项目约定、Python/ML 规范、Windows 脚本约定
+
+### Docker GPU 训练
+
+```powershell
+# 需 nvidia-container-toolkit，取消 docker-compose.yml 中 train 服务注释
+docker compose build train
+docker compose run --rm train python train.py --profile dev
+```
 
 ## 文档
 

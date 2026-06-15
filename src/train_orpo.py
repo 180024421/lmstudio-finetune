@@ -25,11 +25,13 @@ def _load_orpo_dataset(path: Path, max_samples: int = 0) -> Dataset:
         rejected = row.get("rejected", "")
         if not str(rejected).strip():
             continue
-        rows.append({
-            "prompt": row["prompt"],
-            "chosen": row["chosen"],
-            "rejected": rejected,
-        })
+        rows.append(
+            {
+                "prompt": row["prompt"],
+                "chosen": row["chosen"],
+                "rejected": rejected,
+            }
+        )
     return Dataset.from_list(rows)
 
 

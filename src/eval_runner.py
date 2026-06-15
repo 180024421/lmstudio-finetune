@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .config_loader import ROOT, load_config
-from .data_io import iter_jsonl, load_rows
+from .data_io import iter_jsonl
 from .llm_judge import judge_response
 from .lmstudio_client import chat as lm_chat
 from .lmstudio_client import check_lm_studio
@@ -76,6 +76,7 @@ def _score_response(expected: str, actual: str, keywords: list[str] | None = Non
         hits = sum(1 for k in keywords if k.lower() in act)
         if hits:
             return min(0.9, hits / len(keywords)), f"关键词命中 {hits}/{len(keywords)}"
+
     # 字符 bigram 重叠
     def bigrams(s: str) -> set[str]:
         return {s[i : i + 2] for i in range(len(s) - 1)} if len(s) > 1 else set()
@@ -258,10 +259,10 @@ def save_report_html(report: EvalReport | dict[str, Any], path: Path) -> None:
 <html><head><meta charset="utf-8"><title>评测报告</title>
 <style>table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #ccc;padding:6px}}</style>
 </head><body>
-<h1>评测报告 ({_html_escape(data.get('mode', ''))})</h1>
-<p>平均得分: <strong>{data.get('avg_score', 0):.3f}</strong> / {data.get('total', 0)} 条</p>
+<h1>评测报告 ({_html_escape(data.get("mode", ""))})</h1>
+<p>平均得分: <strong>{data.get("avg_score", 0):.3f}</strong> / {data.get("total", 0)} 条</p>
 <table><tr><th>分数</th><th>问题</th><th>说明</th></tr>
-{''.join(rows)}
+{"".join(rows)}
 </table></body></html>"""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")

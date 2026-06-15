@@ -18,49 +18,59 @@ def _rows_from_promo_copy(promo: dict[str, Any], transcript: str = "") -> list[d
         for title in titles:
             if not str(title).strip():
                 continue
-            rows.append({
-                "instruction": "为以下视频内容写一条 B 站推广标题",
-                "input": topic or "（见转写稿）",
-                "output": str(title).strip(),
-            })
+            rows.append(
+                {
+                    "instruction": "为以下视频内容写一条 B 站推广标题",
+                    "input": topic or "（见转写稿）",
+                    "output": str(title).strip(),
+                }
+            )
         if desc and titles:
-            rows.append({
-                "instruction": "为以下视频写 B 站简介",
-                "input": f"标题参考：{titles[0]}\n内容摘要：{topic}",
-                "output": str(desc).strip(),
-            })
+            rows.append(
+                {
+                    "instruction": "为以下视频写 B 站简介",
+                    "input": f"标题参考：{titles[0]}\n内容摘要：{topic}",
+                    "output": str(desc).strip(),
+                }
+            )
 
     xhs = promo.get("xiaohongshu")
     if isinstance(xhs, dict):
         title = xhs.get("title", "")
         body = xhs.get("body", "")
         if title and body:
-            rows.append({
-                "instruction": "根据视频内容写小红书标题与正文",
-                "input": topic,
-                "output": f"{title}\n\n{body}".strip(),
-            })
+            rows.append(
+                {
+                    "instruction": "根据视频内容写小红书标题与正文",
+                    "input": topic,
+                    "output": f"{title}\n\n{body}".strip(),
+                }
+            )
 
     douyin = promo.get("douyin")
     if isinstance(douyin, dict):
         for field in ("title", "caption", "description"):
             val = douyin.get(field)
             if val:
-                rows.append({
-                    "instruction": f"为短视频写抖音{field}",
-                    "input": topic,
-                    "output": str(val).strip(),
-                })
+                rows.append(
+                    {
+                        "instruction": f"为短视频写抖音{field}",
+                        "input": topic,
+                        "output": str(val).strip(),
+                    }
+                )
 
     hooks = promo.get("short_hooks")
     if isinstance(hooks, list):
         for h in hooks:
             if h:
-                rows.append({
-                    "instruction": "写一条短视频开头钩子",
-                    "input": topic,
-                    "output": str(h).strip(),
-                })
+                rows.append(
+                    {
+                        "instruction": "写一条短视频开头钩子",
+                        "input": topic,
+                        "output": str(h).strip(),
+                    }
+                )
     return rows
 
 
@@ -81,11 +91,13 @@ def import_job_dir(job_dir: Path) -> list[dict[str, Any]]:
         narr = json.loads(narr_path.read_text(encoding="utf-8"))
         script = narr.get("script") or narr.get("full_text") or ""
         if script and transcript:
-            rows.append({
-                "instruction": "根据视频转写稿生成口语化解说词",
-                "input": transcript[:3000],
-                "output": str(script)[:4000],
-            })
+            rows.append(
+                {
+                    "instruction": "根据视频转写稿生成口语化解说词",
+                    "input": transcript[:3000],
+                    "output": str(script)[:4000],
+                }
+            )
     return rows
 
 

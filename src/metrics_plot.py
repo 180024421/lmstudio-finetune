@@ -50,9 +50,11 @@ def to_gradio_plots(metrics_path: Path) -> list[dict[str, Any]]:
     for name, points in series.items():
         if not points:
             continue
-        plots.append({
-            "title": name,
-            "data": [[p[0], p[1]] for p in points],
-            "headers": ["step", name],
-        })
+        plots.append(
+            {
+                "title": name,
+                "data": [[p[0], p[1]] for p in points],
+                "headers": ["step", name],
+            }
+        )
     return plots

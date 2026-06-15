@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.api_usage import record_usage, summarize_usage, usage_log_path
+from src.api_usage import record_usage, summarize_usage
 
 
 def test_api_usage(tmp_path, monkeypatch):

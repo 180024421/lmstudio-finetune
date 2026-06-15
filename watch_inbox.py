@@ -14,6 +14,7 @@ def main() -> None:
     p.add_argument("--config", default=None)
     args = p.parse_args()
     from pathlib import Path
+
     cfg = load_config(Path(args.config)) if args.config else load_config()
     if args.once:
         print(json.dumps(process_inbox(cfg), ensure_ascii=False, indent=2))

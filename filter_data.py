@@ -5,9 +5,9 @@ import argparse
 import json
 from pathlib import Path
 
+from src.data_io import load_rows, write_jsonl
 from src.data_quality import filter_file
 from src.pii_filter import redact_row
-from src.data_io import load_rows, write_jsonl
 
 
 def main() -> None:

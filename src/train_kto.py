@@ -21,11 +21,13 @@ def _load_kto_dataset(path: Path, max_samples: int = 0) -> Dataset:
     rows: list[dict[str, Any]] = []
     for row in load_rows(path, max_samples):
         if "prompt" in row and "completion" in row and "label" in row:
-            rows.append({
-                "prompt": row["prompt"],
-                "completion": row["completion"],
-                "label": bool(row["label"]),
-            })
+            rows.append(
+                {
+                    "prompt": row["prompt"],
+                    "completion": row["completion"],
+                    "label": bool(row["label"]),
+                }
+            )
         elif "prompt" in row and "chosen" in row:
             rows.append({"prompt": row["prompt"], "completion": row["chosen"], "label": True})
             if row.get("rejected"):

@@ -9,9 +9,9 @@ from typing import Any
 from rich.console import Console
 
 from .config_loader import ROOT, load_config
-from .data_validate import validate_jsonl
 from .data_io import write_jsonl
-from .import_video_promo import import_job_dir, import_video_promo_jobs
+from .data_validate import validate_jsonl
+from .import_video_promo import import_job_dir
 
 console = Console()
 
@@ -202,6 +202,7 @@ def run_promo_cycle(
     result: dict[str, Any] = {"import": split, "promo_root": str(promo)}
 
     run_cfg = dict(cfg)
+
     def _rel(p: Path) -> str:
         try:
             return str(p.relative_to(ROOT))

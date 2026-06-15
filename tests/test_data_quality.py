@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.data_quality import score_row, filter_rows
+from src.data_quality import filter_rows, score_row
 
 
 def test_good_row():

@@ -8,10 +8,10 @@ from typing import Any
 from rich.console import Console
 from rich.progress import track
 
-from .config_loader import ROOT, load_config
-from .lmstudio_client import completion, openai_client
+from .config_loader import load_config
 from .data_io import write_jsonl
 from .llm_judge import judge_response
+from .lmstudio_client import completion, openai_client
 
 console = Console()
 

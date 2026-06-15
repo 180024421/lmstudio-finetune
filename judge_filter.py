@@ -15,9 +15,7 @@ def main() -> None:
     p.add_argument("-o", "--output", required=True)
     p.add_argument("--rejected", default="data/judge_rejected.jsonl")
     args = p.parse_args()
-    stats = filter_file_with_judge(
-        Path(args.input), Path(args.output), Path(args.rejected), load_config()
-    )
+    stats = filter_file_with_judge(Path(args.input), Path(args.output), Path(args.rejected), load_config())
     print(json.dumps(stats, ensure_ascii=False))
 
 

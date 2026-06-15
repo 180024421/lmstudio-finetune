@@ -11,6 +11,7 @@ from .config_loader import ROOT, load_config
 from .config_schema import validate_config
 from .data_validate import validate_jsonl
 from .lmstudio_client import check_lm_studio
+from .vram_estimate import estimate_vram_gb, format_vram_markdown
 
 
 def _check_import(name: str) -> dict[str, Any]:
@@ -111,12 +112,21 @@ def run_doctor(*, cfg: dict[str, Any] | None = None) -> dict[str, Any]:
     else:
         add("llama.cpp", True, "未配置（导出 GGUF 时需设置 export.llama_cpp_dir）")
 
+    vram = estimate_vram_gb(cfg)
+    report["vram"] = vram
+    add(
+        "显存估算",
+        True,
+        f"预估 {vram['estimated_gb']} GB，建议 ≥ {vram['recommended_gb']} GB",
+        {"breakdown": vram["breakdown"]},
+    )
+
     return report
 
 
 def format_doctor_markdown(report: dict[str, Any]) -> str:
     lines = [
-        f"# 环境诊断",
+        "# 环境诊断",
         "",
         f"- Python: {report['python']}",
         f"- 平台: {report['platform']}",
@@ -128,4 +138,6 @@ def format_doctor_markdown(report: dict[str, Any]) -> str:
     for c in report["checks"]:
         status = "OK" if c["ok"] else "FAIL"
         lines.append(f"| {c['name']} | {status} | {c.get('detail', '')} |")
+    if report.get("vram"):
+        lines.extend(["", format_vram_markdown(report["vram"])])
     return "\n".join(lines)

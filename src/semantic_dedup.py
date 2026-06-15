@@ -6,7 +6,7 @@ from typing import Any
 from rich.console import Console
 
 from .chat_templates import row_to_text
-from .data_dedup import deduplicate_rows, jaccard
+from .data_dedup import deduplicate_rows
 from .data_io import load_rows, write_jsonl
 
 console = Console()

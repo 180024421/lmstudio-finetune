@@ -16,9 +16,13 @@ def main() -> None:
     args = p.parse_args()
     cfg = load_config(Path(args.config)) if args.config else load_config()
     template = cfg.get("dataset", {}).get("chat_template", "qwen")
-    files = [Path(f) for f in args.files] if args.files else [
-        Path(cfg.get("dataset", {}).get("train_file", "data/examples/train.jsonl")),
-    ]
+    files = (
+        [Path(f) for f in args.files]
+        if args.files
+        else [
+            Path(cfg.get("dataset", {}).get("train_file", "data/examples/train.jsonl")),
+        ]
+    )
     for f in files:
         print(json.dumps(compute_stats(f, template=template), ensure_ascii=False, indent=2))
 

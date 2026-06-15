@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .data_dedup import deduplicate_rows
-from .data_io import iter_jsonl, load_rows, row_fingerprint, write_jsonl
+from .data_io import iter_jsonl, row_fingerprint, write_jsonl
 
 
 def merge_jsonl_files(

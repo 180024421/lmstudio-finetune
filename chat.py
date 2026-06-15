@@ -24,6 +24,7 @@ def main() -> None:
     if args.stream:
         for chunk in chat_stream(args.prompt, cfg):
             import json
+
             data = json.loads(chunk)
             print(data["choices"][0]["delta"].get("content", ""), end="", flush=True)
         print()

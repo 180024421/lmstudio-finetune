@@ -32,19 +32,24 @@ def main() -> None:
     p.add_argument("--html", action="store_true", help="同时输出 HTML 报告")
     args = p.parse_args()
     cfg = load_config(Path(args.config)) if args.config else load_config()
-    eval_path = Path(args.file) if args.file else ROOT / cfg.get("dataset", {}).get("eval_file", "data/examples/eval.jsonl")
+    eval_path = (
+        Path(args.file) if args.file else ROOT / cfg.get("dataset", {}).get("eval_file", "data/examples/eval.jsonl")
+    )
 
     if args.mode == "compare":
         if not args.base_model or not args.finetuned_model:
             raise SystemExit("compare 模式需要 --base-model 和 --finetuned-model")
         result = compare_models(
-            eval_path, cfg,
+            eval_path,
+            cfg,
             base_model_name=args.base_model,
             finetuned_model_name=args.finetuned_model,
             max_samples=args.max_samples,
         )
         save_report(result, Path(args.output))
-        print(f"基座: {result['base']['avg_score']:.3f}  微调: {result['finetuned']['avg_score']:.3f}  Δ={result['delta']:+.3f}")
+        print(
+            f"基座: {result['base']['avg_score']:.3f}  微调: {result['finetuned']['avg_score']:.3f}  Δ={result['delta']:+.3f}"
+        )
         return
 
     if args.mode == "local":

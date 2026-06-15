@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 from src.config_loader import load_config
@@ -36,6 +35,7 @@ def main() -> None:
         data_dir = Path(pcfg.get("data_dir", "data/promo"))
         if not data_dir.is_absolute():
             from src.config_loader import ROOT
+
             data_dir = ROOT / data_dir
         stats = import_promo_with_job_split(
             jobs,

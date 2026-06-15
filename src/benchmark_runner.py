@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -9,10 +8,11 @@ from rich.console import Console
 from rich.table import Table
 
 from .config_loader import ROOT, load_config
-from .eval_runner import _extract_prompt_expected, _score_response, save_report
 from .data_io import iter_jsonl
+from .eval_runner import _extract_prompt_expected, _score_response, save_report
 from .llm_judge import judge_response
-from .lmstudio_client import chat as lm_chat, check_lm_studio
+from .lmstudio_client import chat as lm_chat
+from .lmstudio_client import check_lm_studio
 
 console = Console()
 DEFAULT_BENCH = ROOT / "benchmarks" / "default.jsonl"

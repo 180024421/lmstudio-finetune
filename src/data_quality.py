@@ -56,7 +56,9 @@ def score_row(row: dict[str, Any]) -> tuple[float, list[str]]:
     return max(0.0, min(1.0, score)), issues
 
 
-def filter_rows(rows: list[dict[str, Any]], min_score: float = 0.6) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def filter_rows(
+    rows: list[dict[str, Any]], min_score: float = 0.6
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     kept: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     for row in rows:

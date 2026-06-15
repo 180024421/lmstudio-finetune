@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import subprocess
-import sys
-from pathlib import Path
 from typing import Any
 
 from rich.console import Console
@@ -47,7 +44,7 @@ def run_full_pipeline(
     if not skip_eval:
         eval_file = dcfg.get("eval_file")
         if eval_file and (ROOT / eval_file).exists():
-            from .eval_runner import run_eval_lmstudio, run_eval_judge
+            from .eval_runner import run_eval_judge, run_eval_lmstudio
 
             pcfg = cfg.get("pipeline") or {}
             if pcfg.get("use_judge", True):
@@ -57,6 +54,7 @@ def run_full_pipeline(
             result["eval_score"] = er.avg_score
             if bool(pcfg.get("regression", False)):
                 from .regression_gate import check_regression
+
                 result["regression"] = check_regression(er.avg_score)
 
     register_experiment(

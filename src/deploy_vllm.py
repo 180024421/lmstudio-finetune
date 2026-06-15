@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from pathlib import Path
 from typing import Any
 
 from rich.console import Console
@@ -19,10 +18,15 @@ def build_vllm_command(cfg: dict[str, Any] | None = None) -> list[str]:
     model = vcfg.get("model_path") or str(merged)
     port = int(vcfg.get("port", 8001))
     cmd = [
-        sys.executable, "-m", "vllm.entrypoints.openai.api_server",
-        "--model", model,
-        "--port", str(port),
-        "--dtype", vcfg.get("dtype", "auto"),
+        sys.executable,
+        "-m",
+        "vllm.entrypoints.openai.api_server",
+        "--model",
+        model,
+        "--port",
+        str(port),
+        "--dtype",
+        vcfg.get("dtype", "auto"),
     ]
     if vcfg.get("max_model_len"):
         cmd.extend(["--max-model-len", str(int(vcfg["max_model_len"]))])

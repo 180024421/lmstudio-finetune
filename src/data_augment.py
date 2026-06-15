@@ -9,9 +9,8 @@ from rich.console import Console
 from rich.progress import track
 
 from .config_loader import load_config
-from .lmstudio_client import completion, openai_client
 from .data_io import load_rows, write_jsonl
-from .lmstudio_client import check_lm_studio
+from .lmstudio_client import check_lm_studio, completion, openai_client
 
 console = Console()
 
@@ -94,18 +93,22 @@ def augment_rows(
             continue
         for item in _parse_augment_json(raw):
             if "messages" in row:
-                augmented.append({
-                    "messages": [
-                        {"role": "user", "content": item.get("instruction", q)},
-                        {"role": "assistant", "content": item.get("output", "")},
-                    ]
-                })
+                augmented.append(
+                    {
+                        "messages": [
+                            {"role": "user", "content": item.get("instruction", q)},
+                            {"role": "assistant", "content": item.get("output", "")},
+                        ]
+                    }
+                )
             else:
-                augmented.append({
-                    "instruction": item.get("instruction", q),
-                    "input": item.get("input", ""),
-                    "output": item.get("output", ""),
-                })
+                augmented.append(
+                    {
+                        "instruction": item.get("instruction", q),
+                        "input": item.get("input", ""),
+                        "output": item.get("output", ""),
+                    }
+                )
     return augmented
 
 

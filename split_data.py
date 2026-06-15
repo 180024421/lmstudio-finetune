@@ -20,7 +20,9 @@ def main() -> None:
     args = p.parse_args()
     cfg = load_config()
     inp = Path(args.input or cfg.get("dataset", {}).get("train_file", "data/all.jsonl"))
-    paths = split_dataset(inp, Path(args.output), train_ratio=args.train, eval_ratio=args.eval, test_ratio=args.test, seed=args.seed)
+    paths = split_dataset(
+        inp, Path(args.output), train_ratio=args.train, eval_ratio=args.eval, test_ratio=args.test, seed=args.seed
+    )
     print(json.dumps({k: str(v) for k, v in paths.items()}, ensure_ascii=False, indent=2))
     print(json.dumps(split_summary(paths), ensure_ascii=False))
 

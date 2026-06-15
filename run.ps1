@@ -107,6 +107,7 @@ lmstudio-finetune 用法:
   .\run.ps1 -Dedup / -Filter   # 去重 / 质检
   .\run.ps1 -Chat -Prompt "你好"
   .\run.ps1 -Web               # Gradio 控制台 http://127.0.0.1:7860
+  .\start.cmd                  # 一键启动（自动检查环境 + 打开浏览器）
 
 其他 CLI:
   python download_model.py

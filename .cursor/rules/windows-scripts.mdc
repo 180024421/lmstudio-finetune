@@ -1,0 +1,30 @@
+---
+description: Windows PowerShell 脚本与启动约定
+globs: **/*.ps1,**/*.cmd,setup.ps1,run.ps1,start.*
+alwaysApply: false
+---
+
+# Windows 脚本约定
+
+## 入口脚本
+
+| 脚本 | 用途 |
+|------|------|
+| `setup.ps1` | 创建 `.venv`、安装依赖（cpu/gpu/web/api） |
+| `run.ps1` | 日常操作：`-Setup` `-Train` `-Export` `-Web` `-Promo` 等 |
+| `start.cmd` / `一键启动.cmd` | 启动 Gradio 控制台 |
+| `start.ps1` | `-Mode web/api/both` |
+
+## 环境
+
+- 虚拟环境固定为项目根目录 `.venv`
+- `setup.ps1` 会清空代理环境变量（`HTTP_PROXY` 等）
+- GPU 依赖：`requirements-gpu.txt`（CUDA 12.4 torch）
+- 完整依赖：`.\run.ps1 -Setup -SetupMode gpu`
+
+## 修改脚本时
+
+1. 保持 `$ErrorActionPreference = "Stop"`
+2. 使用 `Join-Path $Root ".venv\Scripts\python.exe"` 调用 Python
+3. 新开关加到 `run.ps1` param 块，并转发到对应 `python xxx.py`
+4. 不要在脚本里写业务逻辑，只做编排

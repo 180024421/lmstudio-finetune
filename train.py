@@ -31,6 +31,7 @@ def main() -> None:
     train_file = Path(dcfg.get("train_file", "data/examples/train.jsonl"))
     if not train_file.is_absolute():
         from src.config_loader import ROOT
+
         train_file = ROOT / train_file
     report = validate_jsonl(train_file, template=dcfg.get("chat_template", "qwen"))
     if not report.ok:

@@ -37,9 +37,7 @@ def _llama3(messages: list[dict[str, str]]) -> str:
         role = m.get("role", "user")
         tag = "user" if role == "user" else "assistant" if role == "assistant" else "system"
         content = m.get("content", "")
-        parts.append(
-            f"<|start_header_id|>{tag}<|end_header_id|>\n\n{content}<|eot_id|>"
-        )
+        parts.append(f"<|start_header_id|>{tag}<|end_header_id|>\n\n{content}<|eot_id|>")
     parts.append("<|start_header_id|>assistant<|end_header_id|>\n\n")
     return "".join(parts)
 

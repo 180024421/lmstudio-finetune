@@ -11,13 +11,13 @@ def main() -> None:
     p = argparse.ArgumentParser(description="评测回归门禁")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    show = sub.add_parser("show")
+    sub.add_parser("show")
     setb = sub.add_parser("set")
     setb.add_argument("score", type=float)
     chk = sub.add_parser("check")
     chk.add_argument("score", type=float)
     chk.add_argument("--min-delta", type=float, default=-0.05)
-    auto = sub.add_parser("auto-baseline")
+    sub.add_parser("auto-baseline")
 
     args = p.parse_args()
     if args.cmd == "show":

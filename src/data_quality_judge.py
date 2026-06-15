@@ -64,7 +64,8 @@ def filter_file_with_judge(
     qcfg = (cfg or load_config()).get("data_generation") or {}
     rows = load_rows(input_path)
     kept, rejected = filter_with_judge(
-        rows, cfg,
+        rows,
+        cfg,
         min_rule=float(qcfg.get("min_quality_score", 0.5)),
         min_judge=float(qcfg.get("min_judge_score", 0.6)),
     )

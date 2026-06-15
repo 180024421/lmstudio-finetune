@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .dataset import row_to_training_text
 from .data_io import iter_jsonl, row_fingerprint
+from .dataset import row_to_training_text
 
 
 @dataclass
@@ -66,9 +66,7 @@ def validate_jsonl(
                 report.errors.append(ValidationIssue(lineno, "error", "messages 必须为非空列表"))
                 continue
             has_assistant = any(
-                m.get("role") == "assistant" and str(m.get("content", "")).strip()
-                for m in msgs
-                if isinstance(m, dict)
+                m.get("role") == "assistant" and str(m.get("content", "")).strip() for m in msgs if isinstance(m, dict)
             )
             if require_assistant and not has_assistant:
                 report.errors.append(ValidationIssue(lineno, "error", "缺少 assistant 回复"))
@@ -84,9 +82,7 @@ def validate_jsonl(
             if not str(row.get("answer") or row.get("output", "")).strip() and require_assistant:
                 report.errors.append(ValidationIssue(lineno, "error", "RAG 格式缺少 answer"))
         else:
-            report.errors.append(
-                ValidationIssue(lineno, "error", "需要 messages 或 instruction 字段")
-            )
+            report.errors.append(ValidationIssue(lineno, "error", "需要 messages 或 instruction 字段"))
             continue
 
         try:

@@ -44,6 +44,7 @@ def run_sweep(
         sweep_cfg_path = out_dir / "sweep_config.yaml"
         if not dry_run:
             import yaml
+
             out_dir.mkdir(parents=True, exist_ok=True)
             sweep_cfg_path.write_text(yaml.dump(run_cfg, allow_unicode=True), encoding="utf-8")
 

@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import argparse
 import json
-
-from src.review_store import approve_index, list_pending, merge_approved_to, queue_for_review, reject_index
-from src.data_io import load_rows
 from pathlib import Path
+
+from src.data_io import load_rows
+from src.review_store import approve_index, list_pending, merge_approved_to, queue_for_review, reject_index
 
 
 def main() -> None:

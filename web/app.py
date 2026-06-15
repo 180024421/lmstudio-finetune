@@ -13,40 +13,42 @@ import gradio as gr
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.alignment_pipeline import run_sft_dpo_pipeline  # noqa: E402
+from src.api_usage import usage_markdown  # noqa: E402
+from src.benchmark_runner import run_benchmark  # noqa: E402
 from src.config_loader import load_config  # noqa: E402
+from src.data_augment import augment_file  # noqa: E402
 from src.data_convert import convert_file  # noqa: E402
+from src.data_dedup import deduplicate_file  # noqa: E402
 from src.data_generator import generate_from_text  # noqa: E402
+from src.data_merge import merge_jsonl_files  # noqa: E402
+from src.data_quality import filter_file  # noqa: E402
+from src.data_sample import shuffle_and_sample  # noqa: E402
 from src.data_split import split_dataset, split_summary  # noqa: E402
 from src.data_stats import compute_stats  # noqa: E402
 from src.data_validate import validate_jsonl  # noqa: E402
-from src.data_dedup import deduplicate_file  # noqa: E402
-from src.data_quality import filter_file  # noqa: E402
-from src.eval_runner import run_eval_judge, run_eval_lmstudio, save_report  # noqa: E402
-from src.experiment_registry import experiments_markdown, load_metrics_tail  # noqa: E402
-from src.import_video_promo import import_video_promo_jobs  # noqa: E402
-from src.benchmark_runner import print_benchmark, run_benchmark  # noqa: E402
-from src.inbox_watcher import process_inbox  # noqa: E402
-from src.lmstudio_client import chat, chat_stream, check_lm_studio  # noqa: E402
-from src.regression_gate import check_regression, save_baseline  # noqa: E402
-from src.api_usage import usage_markdown  # noqa: E402
-from src.alignment_pipeline import run_sft_dpo_pipeline  # noqa: E402
-from src.doc_crawler import crawl_to_markdown_files  # noqa: E402
-from src.hub_upload import upload_to_hub  # noqa: E402
-from src.metrics_plot import to_gradio_plots, to_plot_dataframe  # noqa: E402
-from src.lora_ab_report import compare_loras, save_lora_ab_html  # noqa: E402
-from src.lora_manager import list_by_tag  # noqa: E402
-from src.pipeline import run_full_pipeline  # noqa: E402
-from src.promo_integration import run_promo_cycle  # noqa: E402
-from src.data_augment import augment_file  # noqa: E402
-from src.data_merge import merge_jsonl_files  # noqa: E402
-from src.data_sample import shuffle_and_sample  # noqa: E402
 from src.data_version import versions_markdown  # noqa: E402
 from src.dataset_diff import diff_datasets  # noqa: E402
+from src.doc_crawler import crawl_to_markdown_files  # noqa: E402
 from src.doctor import format_doctor_markdown, run_doctor  # noqa: E402
-from src.semantic_dedup import semantic_deduplicate_file  # noqa: E402
-from src.train_report import report_to_markdown, build_train_report  # noqa: E402
-from src.lora_manager import registry_to_markdown  # noqa: E402
+from src.eval_runner import run_eval_judge, run_eval_lmstudio, save_report  # noqa: E402
+from src.experiment_registry import experiments_markdown, load_metrics_tail  # noqa: E402
+from src.hub_upload import upload_to_hub  # noqa: E402
+from src.import_video_promo import import_video_promo_jobs  # noqa: E402
+from src.inbox_watcher import process_inbox  # noqa: E402
+from src.lmstudio_client import chat, chat_stream, check_lm_studio  # noqa: E402
+from src.lora_ab_report import compare_loras, save_lora_ab_html  # noqa: E402
+from src.lora_manager import (  # noqa: E402
+    list_by_tag,
+    registry_to_markdown,
+)
+from src.metrics_plot import to_gradio_plots, to_plot_dataframe  # noqa: E402
+from src.pipeline import run_full_pipeline  # noqa: E402
+from src.promo_integration import run_promo_cycle  # noqa: E402
+from src.regression_gate import check_regression, save_baseline  # noqa: E402
 from src.review_store import approve_index, list_pending, merge_approved_to, reject_index  # noqa: E402
+from src.semantic_dedup import semantic_deduplicate_file  # noqa: E402
+from src.train_report import build_train_report, report_to_markdown  # noqa: E402
 
 _train_proc: subprocess.Popen | None = None
 
@@ -73,7 +75,9 @@ def ui_stats(file_path: str, template: str) -> str:
 
 def ui_split(input_path: str, out_dir: str) -> str:
     paths = split_dataset(Path(input_path), Path(out_dir))
-    return json.dumps({**{k: str(v) for k, v in paths.items()}, "counts": split_summary(paths)}, ensure_ascii=False, indent=2)
+    return json.dumps(
+        {**{k: str(v) for k, v in paths.items()}, "counts": split_summary(paths)}, ensure_ascii=False, indent=2
+    )
 
 
 def ui_convert(inp: str, out: str, fmt: str) -> str:
@@ -111,11 +115,13 @@ def ui_eval(file_path: str, max_n: int) -> str:
         report = run_eval_lmstudio(Path(file_path), max_samples=max_n)
         save_report(report, ROOT / "output" / "eval_report.json")
         import io
+
         from rich.console import Console
+
         buf = io.StringIO()
         console = Console(file=buf, width=100)
-        from src.eval_runner import EvalReport, EvalSample
         from rich.table import Table
+
         table = Table(title="评测")
         table.add_column("分")
         table.add_column("问题")
@@ -216,6 +222,7 @@ def ui_augment(inp: str, out: str, variants: int, max_rows: int) -> str:
 
 def ui_metrics_chart(path: str):
     import pandas as pd
+
     df = to_plot_dataframe(Path(path))
     if df is None or df.empty:
         return pd.DataFrame({"step": [], "metric": [], "value": []})
@@ -238,6 +245,7 @@ def ui_crawl(urls: str, gen: bool) -> str:
         stats = crawl_to_markdown_files(url_list, ROOT / "data" / "crawled", max_pages=5)
         if gen and stats.get("files"):
             from src.data_generator import generate_from_files
+
             n = generate_from_files([Path(f) for f in stats["files"]], ROOT / "data" / "crawled_train.jsonl")
             stats["generated"] = n
         return json.dumps(stats, ensure_ascii=False, indent=2)
@@ -549,13 +557,13 @@ def build_app() -> gr.Blocks:
             btn_usage.click(ui_usage, outputs=hub_out)
         with gr.Tab("部署"):
             gr.Markdown("""
-**FastAPI**: `python serve_api.py` → http://127.0.0.1:8000/v1/chat/completions  
-**Docker**: `docker compose up web api`  
-**Ollama**: `python deploy_ollama.py`  
-**Unsloth**: `python train_unsloth.py` | **KTO/ORPO**: `python kto_train.py` / `orpo_train.py`  
-**vLLM**: `python deploy_vllm.py --dry-run` | **Pipeline**: `python run_pipeline.py`  
-**蒸馏**: `python distill_data.py doc.md` | **Axolotl**: `python export_axolotl.py`  
-**多卡**: `python train_multi.py --dry-run` | **对齐**: `python run_alignment.py`  
+**FastAPI**: `python serve_api.py` → http://127.0.0.1:8000/v1/chat/completions
+**Docker**: `docker compose up web api`
+**Ollama**: `python deploy_ollama.py`
+**Unsloth**: `python train_unsloth.py` | **KTO/ORPO**: `python kto_train.py` / `orpo_train.py`
+**vLLM**: `python deploy_vllm.py --dry-run` | **Pipeline**: `python run_pipeline.py`
+**蒸馏**: `python distill_data.py doc.md` | **Axolotl**: `python export_axolotl.py`
+**多卡**: `python train_multi.py --dry-run` | **对齐**: `python run_alignment.py`
 **抓取**: `python crawl_docs.py URL --generate` | **Hub**: `python upload_hub.py --repo-id user/model`
             """)
         with gr.Tab("LoRA"):
@@ -568,6 +576,7 @@ def build_app() -> gr.Blocks:
 
 def main() -> None:
     import os
+
     port = int(os.environ.get("PORT", "7860"))
     build_app().launch(server_name="127.0.0.1", server_port=port, show_error=True)
 

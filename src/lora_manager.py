@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,7 +8,6 @@ from typing import Any
 import yaml
 
 from .config_loader import ROOT
-
 
 REGISTRY_PATH = ROOT / "output" / "lora_registry.yaml"
 

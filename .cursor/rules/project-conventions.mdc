@@ -1,0 +1,42 @@
+---
+description: lmstudio-finetune 项目结构与开发约定
+alwaysApply: true
+---
+
+# 项目约定
+
+本地 QLoRA/DPO 微调 + GGUF 导出 + LM Studio 部署工具链。
+
+## 目录职责
+
+- `src/` — 核心业务逻辑，新功能优先放这里
+- 根目录 `*.py` — 薄 CLI 入口，只做参数解析并调用 `src/`
+- `web/app.py` — Gradio 控制台，调用 `src/` 函数
+- `tests/` — 每个新 `src/` 模块应有对应 `test_*.py`
+- `config.example.yaml` — 配置模板；运行时复制为 `config.yaml`（不入库）
+- `docs/` — 数据集格式、LM Studio、项目联动文档
+
+## 修改原则
+
+1. 配置统一走 `config.yaml` + `config.dev.yaml` / `config.prod.yaml` 深度合并（`LMSTUDIO_PROFILE` 或 `--profile`）
+2. LM Studio API 统一走 `src/lmstudio_client.py`，不硬编码 URL
+3. 数据校验用 `src/data_validate.py`，训练前必须校验 JSONL
+4. LoRA 注册走 `src/lora_manager.py`
+5. 不破坏 Windows 工作流：`.venv` + `run.ps1` / `setup.ps1`
+
+## 测试要求
+
+- 用 `pytest`，不依赖真实 GPU 或 LM Studio（mock 或 `--dry-run`）
+- CI 只跑 `pytest` + `ruff`，不在 CI 中启动训练
+- 改 `src/pipeline.py`、`src/train_lora.py` 等核心模块必须补/更新测试
+
+## 常用命令
+
+```powershell
+.\run.ps1 -Setup
+.\run.ps1 -Validate
+.\run.ps1 -Train
+python doctor.py --markdown
+pytest tests/ -q
+ruff check .
+```

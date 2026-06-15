@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -62,14 +61,16 @@ def compare_loras(
             report = run_eval_lmstudio(eval_path, cfg, max_samples=max_samples, model_override=model_id or None)
 
         reports[label] = report
-        ranking.append({
-            "name": label,
-            "avg_score": round(report.avg_score, 4),
-            "total": report.total,
-            "mode": report.mode,
-            "lm_studio_model": model_id,
-            "adapter_path": _adapter_meta(name).get("path", "") if label != "base" else "",
-        })
+        ranking.append(
+            {
+                "name": label,
+                "avg_score": round(report.avg_score, 4),
+                "total": report.total,
+                "mode": report.mode,
+                "lm_studio_model": model_id,
+                "adapter_path": _adapter_meta(name).get("path", "") if label != "base" else "",
+            }
+        )
 
     ranking.sort(key=lambda x: x["avg_score"], reverse=True)
     winner = ranking[0]["name"] if ranking else ""
@@ -119,16 +120,16 @@ th{{background:#f5f5f5}}
 .winner{{color:#0a0;font-weight:bold}}
 </style></head><body>
 <h1>LoRA A/B 自动对比报告</h1>
-<p>评测集: <code>{_esc(result.get('eval_file', ''))}</code></p>
-<p>模式: {result.get('mode')} | 样本上限: {result.get('max_samples')}</p>
-<p class="winner">推荐: { _esc(winner) }（均分 {ranking_score(result):.3f}，领先第二名 {result.get('delta_vs_runner_up', 0):+.3f}）</p>
+<p>评测集: <code>{_esc(result.get("eval_file", ""))}</code></p>
+<p>模式: {result.get("mode")} | 样本上限: {result.get("max_samples")}</p>
+<p class="winner">推荐: {_esc(winner)}（均分 {ranking_score(result):.3f}，领先第二名 {result.get("delta_vs_runner_up", 0):+.3f}）</p>
 <h2>排名</h2>
 <table><tr><th>LoRA</th><th>均分</th><th>条数</th><th>LM Studio 模型</th></tr>
-{''.join(rows_html)}
+{"".join(rows_html)}
 </table>
 <h2>胜出模型样例</h2>
 <table><tr><th>分</th><th>问题</th><th>说明</th></tr>
-{''.join(samples_html)}
+{"".join(samples_html)}
 </table>
 <p><small>生成于 lmstudio-finetune lora_ab_report</small></p>
 </body></html>"""

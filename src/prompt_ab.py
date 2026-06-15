@@ -39,16 +39,18 @@ def run_prompt_ab(
                     err = str(e)
                 else:
                     err = ""
-                results.append({
-                    "system_idx": si,
-                    "system": system[:60],
-                    "prompt_idx": pi,
-                    "prompt_prefix": prefix[:40],
-                    "question": question[:80],
-                    "answer": answer[:200],
-                    "heuristic_score": round(score, 3),
-                    "error": err,
-                })
+                results.append(
+                    {
+                        "system_idx": si,
+                        "system": system[:60],
+                        "prompt_idx": pi,
+                        "prompt_prefix": prefix[:40],
+                        "question": question[:80],
+                        "answer": answer[:200],
+                        "heuristic_score": round(score, 3),
+                        "error": err,
+                    }
+                )
     return results
 
 

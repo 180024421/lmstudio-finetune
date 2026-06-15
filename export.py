@@ -21,9 +21,11 @@ def main() -> None:
     cfg = load_config(Path(args.config)) if args.config else load_config()
     if args.lora:
         from src.lora_manager import resolve_adapter
+
         merge_lora(cfg, adapter_path=resolve_adapter(args.lora))
     elif args.all:
         from src.export_model import export_all
+
         export_all(cfg)
     else:
         merge_lora(cfg)

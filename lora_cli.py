@@ -17,7 +17,7 @@ def main() -> None:
     exp.add_argument("name")
     exp.add_argument("-o", "--output", required=True)
 
-    md = sub.add_parser("markdown", help="输出注册表 Markdown")
+    sub.add_parser("markdown", help="输出注册表 Markdown")
 
     meta = sub.add_parser("set-meta", help="更新 LoRA 元数据（LM Studio 模型 ID 等）")
     meta.add_argument("name")

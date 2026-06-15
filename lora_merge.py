@@ -14,6 +14,7 @@ def main() -> None:
     args = p.parse_args()
     cfg = load_config()
     from pathlib import Path
+
     out = Path(args.output) if args.output else None
     path = merge_multiple_loras(args.names, cfg, output_dir=out)
     print(path)

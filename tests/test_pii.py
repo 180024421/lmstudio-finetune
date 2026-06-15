@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.pii_filter import redact_text, redact_row
+from src.pii_filter import redact_row, redact_text
 
 
 def test_redact_phone():

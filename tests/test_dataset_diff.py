@@ -10,8 +10,10 @@ def test_diff(tmp_path: Path):
     a = tmp_path / "a.jsonl"
     b = tmp_path / "b.jsonl"
     a.write_text(
-        json.dumps({"instruction": "q1", "output": "a1"}) + "\n"
-        + json.dumps({"instruction": "q2", "output": "a2"}) + "\n",
+        json.dumps({"instruction": "q1", "output": "a1"})
+        + "\n"
+        + json.dumps({"instruction": "q2", "output": "a2"})
+        + "\n",
         encoding="utf-8",
     )
     b.write_text(json.dumps({"instruction": "q1", "output": "a1"}) + "\n", encoding="utf-8")

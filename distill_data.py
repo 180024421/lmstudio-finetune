@@ -18,6 +18,7 @@ def main() -> None:
     cfg = load_config(Path(args.config)) if args.config else load_config()
     if args.topics:
         from src.data_io import write_jsonl
+
         rows = distill_from_topics(args.topics, cfg)
         write_jsonl(Path(args.output), rows)
         print(len(rows))

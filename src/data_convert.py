@@ -74,11 +74,13 @@ def convert_rag_csv(
     with path.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
-            rows.append({
-                "context": r.get(context_col, ""),
-                "question": r.get(question_col, ""),
-                "answer": r.get(answer_col, ""),
-            })
+            rows.append(
+                {
+                    "context": r.get(context_col, ""),
+                    "question": r.get(question_col, ""),
+                    "answer": r.get(answer_col, ""),
+                }
+            )
     return rows
 
 
@@ -93,11 +95,13 @@ def convert_rag_md(path: Path, chunk_size: int = 1500) -> list[dict[str, Any]]:
         body = "\n".join(lines[1:]).strip()[:chunk_size]
         if not body:
             continue
-        rows.append({
-            "context": body,
-            "question": f"请总结「{title}」的要点",
-            "answer": body[:500],
-        })
+        rows.append(
+            {
+                "context": body,
+                "question": f"请总结「{title}」的要点",
+                "answer": body[:500],
+            }
+        )
     return rows
 
 

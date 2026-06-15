@@ -64,11 +64,11 @@ def write_model_card(merged_dir: Path, cfg: dict[str, Any], *, adapter_path: Pat
     lcfg = cfg.get("lora") or {}
     content = f"""# 微调模型说明
 
-- **基座模型**: {cfg.get('base_model')}
-- **LoRA 路径**: `{adapter_path or 'N/A'}`
+- **基座模型**: {cfg.get("base_model")}
+- **LoRA 路径**: `{adapter_path or "N/A"}`
 - **合并时间**: {datetime.now(timezone.utc).isoformat()}
-- **描述**: {lcfg.get('description', '')}
-- **标签**: {', '.join(lcfg.get('tags') or [])}
+- **描述**: {lcfg.get("description", "")}
+- **标签**: {", ".join(lcfg.get("tags") or [])}
 
 ## 使用方式
 
@@ -83,7 +83,7 @@ ollama create my-model -f Modelfile
 ## 训练配置摘要
 
 ```json
-{json.dumps({'lora': lcfg, 'train': cfg.get('train', {})}, ensure_ascii=False, indent=2)}
+{json.dumps({"lora": lcfg, "train": cfg.get("train", {})}, ensure_ascii=False, indent=2)}
 ```
 """
     card_path.write_text(content, encoding="utf-8")
@@ -137,10 +137,7 @@ def convert_to_gguf(cfg: dict[str, Any] | None = None, *, quant: str | None = No
                 break
 
     if convert_script is None:
-        console.print(
-            "[yellow]未配置 llama.cpp，跳过 GGUF。[/yellow]\n"
-            "设置 export.llama_cpp_dir 后重试。"
-        )
+        console.print("[yellow]未配置 llama.cpp，跳过 GGUF。[/yellow]\n设置 export.llama_cpp_dir 后重试。")
         write_ollama_modelfile(merged_dir, cfg)
         return None
 
