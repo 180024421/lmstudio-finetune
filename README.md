@@ -32,6 +32,7 @@
 | **协作** | HF Hub 上传、网页抓取造数、API 用量统计、配置 Profile (dev/prod) |
 | **可视化** | Gradio 训练曲线 LinePlot |
 | **联动** | video-promo 深度闭环、LoRA A/B HTML 报告、bridge 自动回写 |
+| **新增** | 发布检查、LM Studio 健康检查、数据血缘、难例采样、对话分析、Webhook、训练日志流、配置编辑器 |
 
 ## 环境要求
 
@@ -61,8 +62,9 @@ cd lmstudio-finetune
 ```powershell
 cd lmstudio-finetune
 
-# 安装（CPU 版 torch 体积小；有 GPU 用 -SetupMode gpu）
+# 安装（CPU 版 torch 体积小；有 GPU 用 -SetupMode gpu；国内网络加 -Mirror cn）
 .\run.ps1 -Setup
+.\setup.ps1 -Mode web -Mirror cn   # 或单独使用国内镜像
 copy config.example.yaml config.yaml   # 若 setup 未自动复制
 
 .\run.ps1 -Validate
@@ -137,6 +139,9 @@ python lora_merge.py run1 run2
 python semantic_dedup.py data/train.jsonl -o data/train_deduped.jsonl
 python run_benchmark.py --judge --set-baseline --regression
 python serve_api.py
+python release_check.py --markdown
+python lmstudio_health.py --markdown
+python smoke_test.py
 python watch_inbox.py
 python doctor.py --markdown
 python merge_data.py data/a.jsonl data/b.jsonl -o data/train.jsonl
@@ -216,6 +221,7 @@ docker compose run --rm train python train.py --profile dev
 - [数据集格式](docs/DATASET.md)
 - [LM Studio 部署](docs/LMSTUDIO.md)
 - [与其他项目联动](docs/INTEGRATION.md)
+- [部署与运维](docs/DEPLOYMENT.md)
 
 ## 许可
 

@@ -6,7 +6,9 @@ from pathlib import Path
 
 from transformers import TrainerCallback
 
+from .gpu_monitor import append_gpu_metric
 from .notify import notify
+from .webhook_notify import notify_training_complete
 
 
 class MetricsJsonlCallback(TrainerCallback):
@@ -20,6 +22,10 @@ class MetricsJsonlCallback(TrainerCallback):
         entry = {"step": state.global_step, **logs}
         with self.log_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        try:
+            append_gpu_metric(self.log_path.parent)
+        except Exception:
+            pass
 
 
 class BestAdapterCallback(TrainerCallback):
@@ -51,11 +57,15 @@ class BestAdapterCallback(TrainerCallback):
 
 
 class TrainCompleteNotifyCallback(TrainerCallback):
-    def __init__(self, title: str = "lmstudio-finetune") -> None:
+    def __init__(self, title: str = "lmstudio-finetune", cfg: dict | None = None) -> None:
         self.title = title
+        self.cfg = cfg
 
     def on_train_end(self, args, state, control, **kwargs):
-        notify(self.title, f"训练完成，共 {state.global_step} steps")
+        msg = f"训练完成，共 {state.global_step} steps"
+        notify(self.title, msg)
+        if self.cfg:
+            notify_training_complete(self.cfg, success=True, detail=msg)
 
 
 class CopyBestFromCheckpointCallback(TrainerCallback):

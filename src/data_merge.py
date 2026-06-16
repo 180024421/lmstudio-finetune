@@ -39,6 +39,16 @@ def merge_jsonl_files(
         rows, removed_fuzzy = deduplicate_rows(rows, template=template, threshold=threshold)
 
     write_jsonl(output, rows)
+    try:
+        from .data_lineage import record_lineage
+
+        record_lineage(
+            source="merge:" + ",".join(str(p.name) for p in inputs),
+            output_file=output,
+            count=len(rows),
+        )
+    except Exception:
+        pass
     return {
         "output": str(output),
         "total": len(rows),

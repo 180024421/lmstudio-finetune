@@ -87,6 +87,7 @@ monitoring:
   tensorboard: true
   wandb: false                  # 需 wandb login
   notify_on_complete: true      # Windows 桌面通知
+  webhook_url: ""               # 钉钉/飞书/企业微信 webhook，训练完成推送
 
 export:
   merged_dir: output/merged

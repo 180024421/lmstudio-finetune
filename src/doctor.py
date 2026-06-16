@@ -11,6 +11,7 @@ from .config_loader import ROOT, load_config
 from .config_schema import validate_config
 from .data_validate import validate_jsonl
 from .lmstudio_client import check_lm_studio
+from .package_check import check_package
 from .vram_estimate import estimate_vram_gb, format_vram_markdown
 
 
@@ -85,9 +86,15 @@ def run_doctor(*, cfg: dict[str, Any] | None = None) -> dict[str, Any]:
     add("LM Studio", lm_ok, "已连接" if lm_ok else "未连接 http://127.0.0.1:1234")
 
     for pkg in ("torch", "transformers", "peft", "trl", "datasets", "gradio"):
-        info = _check_import(pkg)
-        required = pkg in ("transformers", "datasets")
-        add(f"包 {pkg}", info["ok"] or not required, info.get("version", info.get("error", "")))
+        info = check_package(pkg)
+        required = pkg in ("transformers", "datasets", "torch")
+        status = info["status"]
+        detail = info.get("version") or info.get("error") or info.get("fix", "")
+        if status == "corrupted":
+            detail = f"损坏: {info.get('error', '')} → {info.get('fix', '')}"
+        elif status == "missing":
+            detail = f"未安装 → {info.get('fix', '')}"
+        add(f"包 {pkg}", status == "ok" or not required, detail)
 
     gpu = _check_gpu()
     add("GPU", gpu["ok"], ", ".join(gpu.get("gpus", [])) or gpu.get("error", ""), gpu)

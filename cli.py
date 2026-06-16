@@ -10,7 +10,10 @@ def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
         print(
-            "子命令: train|eval|export|validate|web|api|pipeline|promo|alignment|sweep|distill|judge-filter|orpo|kto|dpo|benchmark|doctor|merge|augment|diff|shuffle|version|train-report|train-multi|crawl|upload-hub|usage|lora-ab"
+            "子命令: train|eval|export|validate|web|api|pipeline|promo|alignment|sweep|distill|"
+            "judge-filter|orpo|kto|dpo|benchmark|doctor|merge|augment|diff|shuffle|version|"
+            "train-report|train-multi|crawl|upload-hub|usage|lora-ab|release|health|smoke|"
+            "split|stats|hard-examples|dialogue-analytics"
         )
         raise SystemExit(1)
     cmd = sys.argv[1]
@@ -44,6 +47,13 @@ def main() -> None:
         "usage": "usage_cli.py",
         "promo": "run_promo_pipeline.py",
         "lora-ab": "lora_ab_report.py",
+        "release": "release_check.py",
+        "health": "lmstudio_health.py",
+        "smoke": "smoke_test.py",
+        "split": "split_data.py",
+        "stats": "stats_data.py",
+        "hard-examples": "hard_example_sampler.py",
+        "dialogue-analytics": "dialogue_analytics.py",
     }
     script = mapping.get(cmd)
     if not script:

@@ -244,6 +244,12 @@ def save_report(report: EvalReport | dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     data = report.to_dict() if isinstance(report, EvalReport) else report
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        from .eval_history import save_eval_snapshot
+
+        save_eval_snapshot(data, name=data.get("mode", "eval"))
+    except Exception:
+        pass
 
 
 def save_report_html(report: EvalReport | dict[str, Any], path: Path) -> None:

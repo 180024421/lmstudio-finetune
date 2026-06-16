@@ -155,7 +155,7 @@ def run_train(cfg: dict[str, Any] | None = None, *, resume: bool = False) -> Pat
     if bool(tcfg.get("early_stopping", has_eval)) and has_eval:
         callbacks.append(EarlyStoppingCallback(early_stopping_patience=int(tcfg.get("early_stopping_patience", 3))))
     if bool((cfg.get("monitoring") or {}).get("notify_on_complete", True)):
-        callbacks.append(TrainCompleteNotifyCallback())
+        callbacks.append(TrainCompleteNotifyCallback(cfg=cfg))
     if load_best and has_eval:
         callbacks.append(CopyBestFromCheckpointCallback(out_dir, out_dir / "best_adapter"))
 

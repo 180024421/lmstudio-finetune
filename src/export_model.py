@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -59,37 +58,7 @@ def merge_lora(cfg: dict[str, Any] | None = None, *, adapter_path: Path | None =
     return merged_dir
 
 
-def write_model_card(merged_dir: Path, cfg: dict[str, Any], *, adapter_path: Path | None = None) -> Path:
-    card_path = merged_dir / "MODEL_CARD.md"
-    lcfg = cfg.get("lora") or {}
-    content = f"""# 微调模型说明
-
-- **基座模型**: {cfg.get("base_model")}
-- **LoRA 路径**: `{adapter_path or "N/A"}`
-- **合并时间**: {datetime.now(timezone.utc).isoformat()}
-- **描述**: {lcfg.get("description", "")}
-- **标签**: {", ".join(lcfg.get("tags") or [])}
-
-## 使用方式
-
-### LM Studio
-加载 `output/model.gguf` 或本目录（HF 格式）。
-
-### Ollama
-```bash
-ollama create my-model -f Modelfile
-```
-
-## 训练配置摘要
-
-```json
-{json.dumps({"lora": lcfg, "train": cfg.get("train", {})}, ensure_ascii=False, indent=2)}
-```
-"""
-    card_path.write_text(content, encoding="utf-8")
-    return card_path
-
-
+from .model_card import write_enhanced_model_card as write_model_card
 def write_ollama_modelfile(merged_dir: Path, cfg: dict[str, Any], out_path: Path | None = None) -> Path:
     out_path = out_path or merged_dir / "Modelfile"
     ecfg = cfg.get("export") or {}

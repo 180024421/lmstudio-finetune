@@ -48,9 +48,21 @@ from src.promo_integration import run_promo_cycle  # noqa: E402
 from src.regression_gate import check_regression, save_baseline  # noqa: E402
 from src.review_store import approve_index, list_pending, merge_approved_to, reject_index  # noqa: E402
 from src.semantic_dedup import semantic_deduplicate_file  # noqa: E402
-from src.train_report import build_train_report, report_to_markdown  # noqa: E402
-
-_train_proc: subprocess.Popen | None = None
+from src.dialogue_analytics import analyze_dialogue_dataset, format_analytics_markdown  # noqa: E402
+from src.data_lineage import lineage_markdown  # noqa: E402
+from src.eval_history import eval_history_markdown  # noqa: E402
+from src.export_wizard import check_export_readiness, format_export_wizard_markdown  # noqa: E402
+from src.hard_example_sampler import sample_hard_examples  # noqa: E402
+from src.lmstudio_health import format_health_markdown, run_lmstudio_health  # noqa: E402
+from src.profile_wizard import profile_diff_markdown  # noqa: E402
+from src.release_check import format_release_markdown, run_release_check  # noqa: E402
+from src.train_runner import (  # noqa: E402
+    start_training,
+    stop_training,
+    tail_training_log,
+    training_status,
+)
+from src.vram_estimate import estimate_vram_gb, format_vram_markdown  # noqa: E402
 
 
 def _run_cmd(cmd: list[str]) -> str:
@@ -93,14 +105,77 @@ def ui_generate(doc: str) -> str:
 
 
 def ui_train(resume: bool) -> str:
-    global _train_proc
-    if _train_proc and _train_proc.poll() is None:
-        return "训练已在运行中"
-    cmd = [sys.executable, str(ROOT / "train.py")]
-    if resume:
-        cmd.append("--resume")
-    _train_proc = subprocess.Popen(cmd, cwd=ROOT)
-    return f"已启动训练 PID={_train_proc.pid}"
+    extra = ["--resume"] if resume else []
+    r = start_training("train.py", extra_args=extra)
+    return r.get("detail") or f"已启动训练 PID={r.get('pid')}，日志: {r.get('log')}"
+
+
+def ui_train_align(script: str) -> str:
+    r = start_training(script)
+    return r.get("detail") or f"已启动 {script} PID={r.get('pid')}"
+
+
+def ui_train_log() -> str:
+    st = training_status()
+    head = f"运行中 PID={st['pid']}" if st["running"] else f"已结束 exit={st.get('exit_code')}"
+    return head + "\n\n" + tail_training_log(100)
+
+
+def ui_train_stop() -> str:
+    return stop_training()
+
+
+def ui_vram_precheck() -> str:
+    cfg = load_config()
+    return format_vram_markdown(estimate_vram_gb(cfg))
+
+
+def ui_lm_health() -> str:
+    return format_health_markdown(run_lmstudio_health())
+
+
+def ui_export_wizard() -> str:
+    return format_export_wizard_markdown(check_export_readiness())
+
+
+def ui_release_check() -> str:
+    return format_release_markdown(run_release_check())
+
+
+def ui_dialogue_stats(file_path: str) -> str:
+    return format_analytics_markdown(analyze_dialogue_dataset(Path(file_path)))
+
+
+def ui_hard_examples(eval_file: str, out: str, th: float) -> str:
+    import json
+
+    r = sample_hard_examples(Path(eval_file), threshold=th, out_path=Path(out))
+    return json.dumps(r, ensure_ascii=False, indent=2)
+
+
+def ui_lineage() -> str:
+    return lineage_markdown()
+
+
+def ui_eval_history() -> str:
+    return eval_history_markdown()
+
+
+def ui_profile_diff() -> str:
+    return profile_diff_markdown()
+
+
+def ui_save_config(yaml_text: str) -> str:
+    path = ROOT / "config.yaml"
+    path.write_text(yaml_text, encoding="utf-8")
+    return f"已保存 {path}"
+
+
+def ui_load_config() -> str:
+    path = ROOT / "config.yaml"
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    return (ROOT / "config.example.yaml").read_text(encoding="utf-8")
 
 
 def ui_export(gguf: bool) -> str:
@@ -385,6 +460,15 @@ def build_app() -> gr.Blocks:
             btn_dedup = gr.Button("近似去重")
             btn_dedup.click(ui_dedup, [dedup_in, dedup_out, dedup_th], data_out)
             with gr.Row():
+                sem_in = gr.Textbox(value=default_train, label="语义去重输入")
+                sem_out = gr.Textbox(value="data/train_semantic_deduped.jsonl", label="语义去重输出")
+            btn_sem = gr.Button("语义去重")
+            btn_sem.click(ui_semantic_dedup, [sem_in, sem_out], data_out)
+            btn_dialogue = gr.Button("对话质量分析")
+            btn_dialogue.click(ui_dialogue_stats, data_file, data_out)
+            btn_lin = gr.Button("数据血缘")
+            btn_lin.click(ui_lineage, outputs=data_out)
+            with gr.Row():
                 filt_in = gr.Textbox(value="data/generated.jsonl", label="过滤输入")
                 filt_out = gr.Textbox(value="data/train_filtered.jsonl", label="过滤输出")
                 filt_min = gr.Slider(0.0, 1.0, value=0.6, step=0.05, label="最低质量分")
@@ -401,17 +485,43 @@ def build_app() -> gr.Blocks:
             btn_gen = gr.Button("LM Studio 生成问答对")
             gen_out = gr.Textbox(lines=15, label="生成结果 JSON")
             btn_gen.click(ui_generate, doc, gen_out)
+        with gr.Tab("状态"):
+            with gr.Row():
+                btn_health = gr.Button("LM Studio 健康检查", variant="primary")
+                btn_vram = gr.Button("显存预检")
+                btn_release = gr.Button("发布检查清单")
+            status_out = gr.Textbox(lines=12, label="详情")
+            btn_health.click(ui_lm_health, outputs=status_out)
+            btn_vram.click(ui_vram_precheck, outputs=status_out)
+            btn_release.click(ui_release_check, outputs=status_out)
+            app.load(ui_lm_health, outputs=status_out)
         with gr.Tab("训练"):
             resume = gr.Checkbox(label="断点续训", value=False)
-            btn_train = gr.Button("启动 QLoRA 训练", variant="primary")
-            train_log = gr.Textbox(label="状态")
+            with gr.Row():
+                btn_train = gr.Button("启动 QLoRA", variant="primary")
+                btn_dpo = gr.Button("启动 DPO")
+                btn_kto = gr.Button("启动 KTO")
+                btn_orpo = gr.Button("启动 ORPO")
+            with gr.Row():
+                btn_log = gr.Button("刷新训练日志")
+                btn_stop = gr.Button("停止训练")
+            train_log = gr.Textbox(label="训练日志", lines=14)
             btn_train.click(ui_train, resume, train_log)
+            btn_dpo.click(lambda: ui_train_align("dpo_train.py"), outputs=train_log)
+            btn_kto.click(lambda: ui_train_align("kto_train.py"), outputs=train_log)
+            btn_orpo.click(lambda: ui_train_align("orpo_train.py"), outputs=train_log)
+            btn_log.click(ui_train_log, outputs=train_log)
+            btn_stop.click(ui_train_stop, outputs=train_log)
             metrics_path = gr.Textbox(value="output/run1/metrics.jsonl", label="metrics 路径")
             btn_metrics = gr.Button("刷新训练曲线数据")
             metrics_out = gr.Textbox(lines=12, label="最近 metrics")
             btn_metrics.click(ui_metrics, metrics_path, metrics_out)
-            gr.Markdown("DPO: `python dpo_train.py`")
+            train_timer = gr.Timer(value=5)
+            train_timer.tick(ui_train_log, outputs=train_log)
         with gr.Tab("导出"):
+            btn_wiz = gr.Button("导出向导检查")
+            wiz_out = gr.Textbox(lines=8, label="导出状态")
+            btn_wiz.click(ui_export_wizard, outputs=wiz_out)
             gguf = gr.Checkbox(label="转 GGUF", value=True)
             btn_exp = gr.Button("合并 + 导出")
             exp_out = gr.Textbox(lines=10, label="日志")
@@ -425,6 +535,15 @@ def build_app() -> gr.Blocks:
             eval_out = gr.Textbox(lines=18, label="报告")
             btn_eval.click(ui_eval, [eval_file, max_n], eval_out)
             btn_judge.click(ui_judge_eval, [eval_file, max_n], eval_out)
+            btn_hist = gr.Button("评测历史")
+            btn_hist.click(ui_eval_history, outputs=eval_out)
+            gr.Markdown("### 难例回流")
+            with gr.Row():
+                hard_eval = gr.Textbox(value="output/eval_report.json", label="评测报告")
+                hard_out = gr.Textbox(value="data/hard_examples.jsonl", label="输出")
+                hard_th = gr.Slider(0, 1, value=0.6, step=0.05, label="分数阈值")
+            btn_hard = gr.Button("采样难例")
+            btn_hard.click(ui_hard_examples, [hard_eval, hard_out, hard_th], eval_out)
         with gr.Tab("实验"):
             exp_md = gr.Markdown()
             btn_exp = gr.Button("刷新实验对比")
@@ -448,6 +567,7 @@ def build_app() -> gr.Blocks:
             btn_merge.click(ui_review_merge, merge_tgt, review_status)
             app.load(ui_review_list, outputs=review_box)
         with gr.Tab("对话"):
+            lm_hint = gr.Markdown("加载失败时请：小模型 Q4_K_M、GPU Offload=0、更新驱动")
             prompt = gr.Textbox(label="输入", value="你好")
             with gr.Row():
                 btn_chat = gr.Button("发送")
@@ -522,6 +642,18 @@ def build_app() -> gr.Blocks:
             mplot_out = gr.Textbox(lines=8, label="文本摘要")
             btn_mplot.click(ui_metrics_chart, mpath, line_plot)
             btn_mplot.click(ui_metrics_plot, mpath, mplot_out)
+            curve_timer = gr.Timer(value=10)
+            curve_timer.tick(ui_metrics_plot, mpath, mplot_out)
+        with gr.Tab("配置"):
+            cfg_editor = gr.Textbox(lines=22, label="config.yaml", value=ui_load_config())
+            with gr.Row():
+                btn_cfg_load = gr.Button("重新加载")
+                btn_cfg_save = gr.Button("保存配置", variant="primary")
+                btn_prof = gr.Button("Profile 对比")
+            cfg_status = gr.Textbox(lines=10, label="状态")
+            btn_cfg_load.click(ui_load_config, outputs=cfg_editor)
+            btn_cfg_save.click(ui_save_config, cfg_editor, cfg_status)
+            btn_prof.click(ui_profile_diff, outputs=cfg_status)
         with gr.Tab("video-promo"):
             gr.Markdown("从 video-promo jobs 导入 → 训练 → 评测 → A/B → 回写 bridge")
             pr_sk = gr.Checkbox(label="跳过训练", value=False)
@@ -556,15 +688,22 @@ def build_app() -> gr.Blocks:
             btn_hub.click(ui_hub_upload, hub_repo, hub_out)
             btn_usage.click(ui_usage, outputs=hub_out)
         with gr.Tab("部署"):
+            dep_out = gr.Textbox(lines=12, label="输出")
+            with gr.Row():
+                btn_api = gr.Button("启动 FastAPI（子进程）")
+                btn_tb = gr.Button("打开 TensorBoard 说明")
+            btn_api.click(
+                lambda: _run_cmd([sys.executable, str(ROOT / "serve_api.py")]),
+                outputs=dep_out,
+            )
+            btn_tb.click(
+                lambda: "在项目目录运行: tensorboard --logdir output/run1",
+                outputs=dep_out,
+            )
             gr.Markdown("""
-**FastAPI**: `python serve_api.py` → http://127.0.0.1:8000/v1/chat/completions
-**Docker**: `docker compose up web api`
-**Ollama**: `python deploy_ollama.py`
-**Unsloth**: `python train_unsloth.py` | **KTO/ORPO**: `python kto_train.py` / `orpo_train.py`
-**vLLM**: `python deploy_vllm.py --dry-run` | **Pipeline**: `python run_pipeline.py`
-**蒸馏**: `python distill_data.py doc.md` | **Axolotl**: `python export_axolotl.py`
-**多卡**: `python train_multi.py --dry-run` | **对齐**: `python run_alignment.py`
-**抓取**: `python crawl_docs.py URL --generate` | **Hub**: `python upload_hub.py --repo-id user/model`
+**FastAPI**: http://127.0.0.1:8000/v1/chat/completions | **Gradio**: http://127.0.0.1:7860
+**Docker**: `docker compose up web api` | **Ollama**: `python deploy_ollama.py`
+**vLLM**: `python deploy_vllm.py --dry-run` | **发布检查**: `python release_check.py --markdown`
             """)
         with gr.Tab("LoRA"):
             btn_lora = gr.Button("刷新注册表")

@@ -62,9 +62,10 @@ function Test-PythonPkg {
 function Ensure-Dependencies {
     param([string]$PythonExe)
     if ($Mode -in @("web", "both")) {
-        if (-not (Test-PythonPkg -PythonExe $PythonExe -Pkg "gradio")) {
-            Write-Host "[安装] 缺少 gradio，正在安装 Web 依赖..."
-            & "$Root\setup.ps1" -Mode web
+        if (-not (Test-PythonPkg -PythonExe $PythonExe -Pkg "gradio") -or
+            -not (Test-PythonPkg -PythonExe $PythonExe -Pkg "torch")) {
+            Write-Host "[安装] 缺少 gradio / torch，正在安装 Web 依赖（国内镜像）..."
+            & "$Root\setup.ps1" -Mode web -Mirror cn
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         }
     }

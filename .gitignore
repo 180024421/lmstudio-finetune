@@ -14,3 +14,5 @@ web/__pycache__/
 .DS_Store
 *.pt
 *.safetensors
+data/lineage.jsonl
+output/eval_history/

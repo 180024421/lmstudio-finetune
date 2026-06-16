@@ -28,6 +28,9 @@ param(
     [switch]$Promo,
     [switch]$LoraAb,
     [switch]$Stream,
+    [switch]$Release,
+    [switch]$Health,
+    [switch]$Smoke,
     [string]$Profile = "",
     [string]$Prompt = "你好"
 )
@@ -55,6 +58,9 @@ $py = ".\.venv\Scripts\python.exe"
 
 if ($Validate) { & $py validate_data.py; exit $LASTEXITCODE }
 if ($Doctor)    { & $py doctor.py --markdown; exit $LASTEXITCODE }
+if ($Health)    { & $py lmstudio_health.py --markdown; exit $LASTEXITCODE }
+if ($Release)   { & $py release_check.py --markdown; exit $LASTEXITCODE }
+if ($Smoke)     { & $py smoke_test.py; exit $LASTEXITCODE }
 if ($Stats)    { & $py stats_data.py; exit $LASTEXITCODE }
 if ($Train) {
     if ($DryRun) { & $py train.py --dry-run @profileArg; exit $LASTEXITCODE }
