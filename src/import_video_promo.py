@@ -74,12 +74,36 @@ def _rows_from_promo_copy(promo: dict[str, Any], transcript: str = "") -> list[d
     return rows
 
 
+def _input_from_topic_brief(job_dir: Path) -> str:
+    brief_path = job_dir / "topic_brief.json"
+    if not brief_path.exists():
+        return ""
+    try:
+        brief = json.loads(brief_path.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    parts = [f"主题：{brief.get('topic', '')}"]
+    if brief.get("points"):
+        parts.append(f"要点：{brief['points']}")
+    proj = brief.get("project")
+    if isinstance(proj, dict) and proj:
+        if proj.get("name"):
+            parts.append(f"项目：{proj['name']}")
+        if proj.get("repo_url"):
+            parts.append(f"GitHub：{proj['repo_url']}")
+        if proj.get("tagline"):
+            parts.append(f"定位：{proj['tagline']}")
+    return "\n".join(p for p in parts if p.strip())
+
+
 def import_job_dir(job_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     transcript = ""
     tx = job_dir / "transcript.txt"
     if tx.exists():
         transcript = tx.read_text(encoding="utf-8", errors="ignore")
+    if not transcript:
+        transcript = _input_from_topic_brief(job_dir)
 
     promo_path = job_dir / "promo_copy.json"
     if promo_path.exists():
