@@ -140,22 +140,27 @@ switch ($Mode) {
         & $py serve_api.py
     }
     "both" {
-        if (-not $NoBrowser) {
-            Start-Process $webUrl | Out-Null
-        }
         Write-Host "       Gradio  $webUrl"
         Write-Host "       FastAPI http://127.0.0.1:8000"
         Write-Host "       按 Ctrl+C 停止 Web，API 在后台继续运行"
         Start-Process -FilePath $py -ArgumentList "serve_api.py" -WorkingDirectory $Root -WindowStyle Minimized | Out-Null
+        if ($NoBrowser) {
+            Remove-Item Env:GRADIO_INBROWSER -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:GRADIO_INBROWSER = "1"
+        }
         & $py web\app.py
     }
     default {
-        if (-not $NoBrowser) {
-            Start-Sleep -Milliseconds 800
-            Start-Process $webUrl | Out-Null
-        }
         Write-Host "       Gradio 控制台 $webUrl"
         Write-Host "       按 Ctrl+C 停止"
+        if ($NoBrowser) {
+            Remove-Item Env:GRADIO_INBROWSER -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:GRADIO_INBROWSER = "1"
+        }
         & $py web\app.py
     }
 }

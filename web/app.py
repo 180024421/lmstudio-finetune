@@ -428,7 +428,7 @@ def ui_review_merge(target: str) -> str:
 def build_app() -> gr.Blocks:
     cfg = load_config()
     default_train = cfg.get("dataset", {}).get("train_file", "data/examples/train.jsonl")
-    with gr.Blocks(title="lmstudio-finetune", theme=gr.themes.Soft()) as app:
+    with gr.Blocks(title="lmstudio-finetune") as app:
         gr.Markdown("# lmstudio-finetune 控制台\n数据 → 训练 → 导出 → 评测 → 对话")
         with gr.Tab("数据"):
             with gr.Row():
@@ -717,7 +717,28 @@ def main() -> None:
     import os
 
     port = int(os.environ.get("PORT", "7860"))
-    build_app().launch(server_name="127.0.0.1", server_port=port, show_error=True)
+    inbrowser = os.environ.get("GRADIO_INBROWSER", "0") == "1"
+    print("正在加载模块与构建界面（首次约 30–60 秒，请稍候）...", flush=True)
+    app = build_app()
+    url = f"http://127.0.0.1:{port}/"
+    print(f"界面已就绪，启动 Gradio 服务 {url}", flush=True)
+    try:
+        app.launch(
+            server_name="127.0.0.1",
+            server_port=port,
+            show_error=True,
+            theme=gr.themes.Soft(),
+            inbrowser=inbrowser,
+        )
+    except OSError as exc:
+        if "Cannot find empty port" in str(exc):
+            print(
+                f"\n[错误] 端口 {port} 已被占用，无法启动 Web 控制台。\n"
+                f"  1. 关闭旧进程: netstat -ano | findstr :{port}  →  taskkill /PID <pid> /F\n"
+                f"  2. 或换端口:   $env:PORT=7861; .\\run.ps1 -Web\n",
+                flush=True,
+            )
+        raise
 
 
 if __name__ == "__main__":
